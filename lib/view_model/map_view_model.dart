@@ -22,16 +22,16 @@ class MapViewModel {
   void _generateMap(int width, int height) {
     _map = List.generate(width, (_) => List.generate(height, (_) => null),
         growable: false);
-    _map[0][0] = Tile.horizontal_low;
-    _map[0][1] = Tile.horizontal_high;
+    _map[0][0] = Tile.horizontal;
+    _map[width - 1][height - 1] = Tile.horizontal;
     for (int j = 0; j < height; j++) {
       for (int i = 0; i < width; i++) {
         if (_map[i][j] == null) {
           _map[i][j] = Tile.suitableTile(
-            leftInputs: i == 0 ? null : _map[i - 1][j].rightInputs,
-            rightInputs: i == width - 1 ? null : _map[i + 1][j]?.leftInputs,
-            topInputs: j == 0 ? null : _map[i][j - 1].bottomInputs,
-            bottomInputs: j == height - 1 ? null : _map[i][j + 1]?.topInputs,
+            leftInput: i == 0 ? null : _map[i - 1][j].rightInput,
+            rightInput: i == width - 1 ? null : _map[i + 1][j]?.leftInput,
+            topInput: j == 0 ? null : _map[i][j - 1].bottomInput,
+            bottomInput: j == height - 1 ? null : _map[i][j + 1]?.topInput,
           );
         }
       }
