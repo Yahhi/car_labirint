@@ -6,9 +6,8 @@ class MapViewModel {
   Stream<List<List<Tile>>> get tiles => _tilesController.stream;
   List<List<Tile>> _map;
 
-  MapViewModel(int width, int height) {
-    recreateMap(width, height);
-  }
+  int get mapWidth => _map.length;
+  int get mapHeight => _map?.first?.length;
 
   void recreateMap(int width, int height) {
     _generateMap(width, height);
@@ -22,9 +21,12 @@ class MapViewModel {
   void _generateMap(int width, int height) {
     _map = List.generate(width, (_) => List.generate(height, (_) => null),
         growable: false);
-    _map[0][0] = Tile.horizontal;
+    for (int i = 0; i < width; i++) {
+      _map[i][0] = Tile.no_roads;
+    }
+    _map[0][1] = Tile.horizontal;
     _map[width - 1][height - 1] = Tile.horizontal;
-    for (int j = 0; j < height; j++) {
+    for (int j = 1; j < height; j++) {
       for (int i = 0; i < width; i++) {
         if (_map[i][j] == null) {
           _map[i][j] = Tile.suitableTile(

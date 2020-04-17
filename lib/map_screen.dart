@@ -10,16 +10,20 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  MapViewModel viewModel = MapViewModel(6, 10);
+  MapViewModel viewModel = MapViewModel();
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback(_calculateTiles);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Map with car"),
-      ),
-      body: Center(
-        child: StreamBuilder<List<List<Tile>>>(
+        body: Stack(
+      children: <Widget>[
+        StreamBuilder<List<List<Tile>>>(
           stream: viewModel.tiles,
           builder: (context, data) {
             if (data.data == null) {
@@ -38,14 +42,31 @@ class _MapScreenState extends State<MapScreen> {
             );
           },
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          viewModel.recreateMap(6, 10);
-        },
-        tooltip: 'Increment',
-        child: Icon(Icons.refresh),
-      ),
-    );
+        Positioned(
+          top: TileView.tile_size * (viewModel.mapHeight - 1 ?? 0),
+          right: 0,
+          child: Image.asset(
+            "assets/bus2_wait.png",
+            height: TileView.tile_size,
+            width: TileView.tile_size,
+          ),
+        ),
+        Positioned(
+          top: TileView.tile_size,
+          left: 0,
+          child: Image.asset(
+            "assets/bus2.png",
+            height: TileView.tile_size,
+            width: TileView.tile_size,
+          ),
+        )
+      ],
+    ));
+  }
+
+  void _calculateTiles(_) {
+    final width = MediaQuery.of(context).size.width;
+    final height = MediaQuery.of(context).size.height;
+    viewModel.recreateMap((width / 50).floor(), (height / 50).floor());
   }
 }
