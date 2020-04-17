@@ -43,7 +43,7 @@ class _MapScreenState extends State<MapScreen> {
           },
         ),
         Positioned(
-          top: TileView.tile_size * (viewModel.mapHeight - 1 ?? 0),
+          top: TileView.tile_size * ((viewModel.mapHeight ?? 1 - 1)),
           right: 0,
           child: Image.asset(
             "assets/bus2_wait.png",
