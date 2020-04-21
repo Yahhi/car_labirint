@@ -5,6 +5,7 @@ class MapViewModel {
   BehaviorSubject<List<List<Tile>>> _tilesController = BehaviorSubject();
   Stream<List<List<Tile>>> get tiles => _tilesController.stream;
   List<List<Tile>> _map;
+  List<List<bool>> _visited;
 
   int get mapWidth => _map.length;
   int get mapHeight => _map?.first?.length;
@@ -38,5 +39,49 @@ class MapViewModel {
         }
       }
     }
+    if (!_mapIsCorrect()) {
+      print('map is incorrect');
+      _generateMap(width, height);
+    }
+  }
+
+  bool _mapIsCorrect() {
+    _visited = List.generate(
+        mapWidth, (_) => List.filled(mapHeight, false, growable: false),
+        growable: false);
+    return _doesPathExist(0, 1, mapWidth - 1, mapHeight - 1);
+  }
+
+  bool _doesPathExist(int startX, int startY, int endX, int endY) {
+    if (startX == endX && startY == endY) {
+      return true;
+    } else {
+      _visited[startX][startY] = true;
+      if (_map[startX][startY].leftInput == Tile.road &&
+          _canGo(startX - 1, startY) &&
+          _doesPathExist(startX - 1, startY, endX, endY)) {
+        return true;
+      }
+      if (_map[startX][startY].rightInput == Tile.road &&
+          _canGo(startX + 1, startY) &&
+          _doesPathExist(startX + 1, startY, endX, endY)) {
+        return true;
+      }
+      if (_map[startX][startY].topInput == Tile.road &&
+          _canGo(startX, startY - 1) &&
+          _doesPathExist(startX, startY - 1, endX, endY)) {
+        return true;
+      }
+      if (_map[startX][startY].bottomInput == Tile.road &&
+          _canGo(startX, startY + 1) &&
+          _doesPathExist(startX, startY + 1, endX, endY)) {
+        return true;
+      }
+      return false;
+    }
+  }
+
+  bool _canGo(int x, int y) {
+    return x >= 0 && x < mapWidth && y >= 0 && y < mapHeight && !_visited[x][y];
   }
 }
