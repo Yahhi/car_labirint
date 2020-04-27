@@ -11,6 +11,9 @@ class MapViewModel {
   final BehaviorSubject<bool> _isOnCorrectTileController = BehaviorSubject();
   Stream<bool> get isOnCorrectTile => _isOnCorrectTileController.stream;
 
+  final BehaviorSubject<int> _rotationController = BehaviorSubject();
+  Stream<int> get rotation => _rotationController.stream;
+
   int get mapWidth => _map.length;
   int get mapHeight => _map?.first?.length;
 
@@ -98,22 +101,37 @@ class MapViewModel {
   bool canGo(int x, int y) {
     bool result = false;
     if (actualY == y && actualX == x) {
-      result = true;
+      //result = true;
+      //_rotationController.add(moving_right);
     } else if (actualX == x && actualY + 1 == y) {
       //moving down
+      _rotationController.add(moving_down);
       result = _map[actualX][actualY].bottomInput == Tile.road;
     } else if (actualX == x && actualY - 1 == y) {
       //moving up
+      _rotationController.add(moving_up);
       result = _map[actualX][actualY].topInput == Tile.road;
     } else if (actualX + 1 == x && actualY == y) {
       //moving right
+      _rotationController.add(moving_right);
       result = _map[actualX][actualY].rightInput == Tile.road;
     } else if (actualX - 1 == x && actualY == y) {
       //moving left
+      _rotationController.add(moving_left);
       result = _map[actualX][actualY].leftInput == Tile.road;
     }
     print("isOnCorrect $result");
     _isOnCorrectTileController.add(result);
     return result;
+  }
+
+  static const moving_right = 0;
+  static const moving_down = 1;
+  static const moving_left = 2;
+  static const moving_up = 3;
+
+  void finishMoving() {
+    _rotationController.add(moving_right);
+    _isOnCorrectTileController.add(false);
   }
 }

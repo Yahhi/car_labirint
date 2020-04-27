@@ -127,6 +127,7 @@ class _MapScreenState extends State<MapScreen> {
                       activeAreaX = carX;
                       activeAreaY = carY;
                     });
+                    viewModel.finishMoving();
                   },
                   childWhenDragging: Container(),
                   child: Image.asset(
@@ -140,10 +141,18 @@ class _MapScreenState extends State<MapScreen> {
                       if (snapshot.data == null || !snapshot.data) {
                         return Container();
                       } else {
-                        return Image.asset(
-                          "assets/bus2.png",
-                          height: TileView.tile_size,
-                          width: TileView.tile_size,
+                        return StreamBuilder<int>(
+                          stream: viewModel.rotation,
+                          builder: (context, snapshot) {
+                            return RotatedBox(
+                              quarterTurns: snapshot.data ?? 0,
+                              child: Image.asset(
+                                "assets/bus2.png",
+                                height: TileView.tile_size,
+                                width: TileView.tile_size,
+                              ),
+                            );
+                          },
                         );
                       }
                     },
