@@ -2,11 +2,14 @@ import 'package:carlabirint/model/tile.dart';
 import 'package:rxdart/rxdart.dart';
 
 class MapViewModel {
-  BehaviorSubject<List<List<Tile>>> _tilesController = BehaviorSubject();
+  final BehaviorSubject<List<List<Tile>>> _tilesController = BehaviorSubject();
   Stream<List<List<Tile>>> get tiles => _tilesController.stream;
   List<List<Tile>> _map;
   List<List<bool>> _visited;
   int actualX, actualY;
+
+  final BehaviorSubject<bool> _isOnCorrectTileController = BehaviorSubject();
+  Stream<bool> get isOnCorrectTile => _isOnCorrectTileController.stream;
 
   int get mapWidth => _map.length;
   int get mapHeight => _map?.first?.length;
@@ -18,6 +21,7 @@ class MapViewModel {
 
   void close() {
     _tilesController.close();
+    _isOnCorrectTileController?.close();
   }
 
   void _generateMap(int width, int height) {
@@ -92,19 +96,24 @@ class MapViewModel {
   }
 
   bool canGo(int x, int y) {
-    if (actualX == x && actualY + 1 == y) {
+    bool result = false;
+    if (actualY == y && actualX == x) {
+      result = true;
+    } else if (actualX == x && actualY + 1 == y) {
       //moving down
-      return _map[actualX][actualY].bottomInput == Tile.road;
+      result = _map[actualX][actualY].bottomInput == Tile.road;
     } else if (actualX == x && actualY - 1 == y) {
       //moving up
-      return _map[actualX][actualY].topInput == Tile.road;
+      result = _map[actualX][actualY].topInput == Tile.road;
     } else if (actualX + 1 == x && actualY == y) {
       //moving right
-      return _map[actualX][actualY].rightInput == Tile.road;
+      result = _map[actualX][actualY].rightInput == Tile.road;
     } else if (actualX - 1 == x && actualY == y) {
       //moving left
-      return _map[actualX][actualY].leftInput == Tile.road;
+      result = _map[actualX][actualY].leftInput == Tile.road;
     }
-    return false;
+    print("isOnCorrect $result");
+    _isOnCorrectTileController.add(result);
+    return result;
   }
 }
