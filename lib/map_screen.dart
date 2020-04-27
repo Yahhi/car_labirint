@@ -11,6 +11,10 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   MapViewModel viewModel = MapViewModel();
+  int carX = 0;
+  int carY = 1;
+  int activeAreaX = 0;
+  int activeAreaY = 1;
 
   @override
   void initState() {
@@ -27,18 +31,57 @@ class _MapScreenState extends State<MapScreen> {
               if (data.data == null) {
                 return CircularProgressIndicator();
               }
+              int x = -1;
+              int y = 0;
               return Stack(
                 children: <Widget>[
                   Row(
-                    children: data.data
-                        .map((columnList) => Column(
-                              children: columnList
-                                  .map((tileItem) => TileView(
-                                        tile: tileItem,
-                                      ))
-                                  .toList(growable: false),
-                            ))
-                        .toList(growable: false),
+                    children: data.data.map((columnList) {
+                      y = -1;
+                      x++;
+                      return Column(
+                        children: columnList.map(
+                          (tileItem) {
+                            y++;
+                            final itemX = x;
+                            final itemY = y;
+                            return DragTarget(
+                              onWillAccept: (_) {
+                                final bool canGo =
+                                    viewModel.canGo(itemX, itemY);
+                                print("canGo to $itemX, $itemY: $canGo");
+                                return canGo;
+                              },
+                              onLeave: (_) {
+                                print('on leave $itemX, $itemY');
+                                if (viewModel.canGo(itemX, itemY)) {
+                                  viewModel.setCarPosition(itemX, itemY);
+                                  setState(() {
+                                    carX = itemX;
+                                    carY = itemY;
+                                  });
+                                }
+                              },
+                              onAccept: (_) {
+                                viewModel.setCarPosition(itemX, itemY);
+                                print(
+                                    "will set car position to $itemX, $itemY");
+                                setState(() {
+                                  carX = itemX;
+                                  carY = itemY;
+                                });
+                              },
+                              builder: (context, List<dynamic> candidateData,
+                                  List<dynamic> rejectedData) {
+                                return TileView(
+                                  tile: tileItem,
+                                );
+                              },
+                            );
+                          },
+                        ).toList(growable: false),
+                      );
+                    }).toList(growable: false),
                   ),
                   Positioned(
                     top:
@@ -51,12 +94,32 @@ class _MapScreenState extends State<MapScreen> {
                     ),
                   ),
                   Positioned(
-                    top: TileView.tile_size,
-                    left: 0,
+                    top: carY * TileView.tile_size,
+                    left: carX * TileView.tile_size,
                     child: Image.asset(
                       "assets/bus2.png",
                       height: TileView.tile_size,
                       width: TileView.tile_size,
+                    ),
+                  ),
+                  Positioned(
+                    left: activeAreaX * TileView.tile_size,
+                    top: activeAreaY * TileView.tile_size,
+                    child: Draggable(
+                      onDragStarted: () {
+                        viewModel.setCarPosition(carX, carY);
+                      },
+                      onDragEnd: (_) {
+                        activeAreaX = carX;
+                        activeAreaY = carY;
+                      },
+                      childWhenDragging: Container(),
+                      child: Image.asset(
+                        "assets/transparent_tile.png",
+                        height: TileView.tile_size,
+                        width: TileView.tile_size,
+                      ),
+                      feedback: Container(),
                     ),
                   )
                 ],

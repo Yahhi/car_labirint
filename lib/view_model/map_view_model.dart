@@ -6,6 +6,7 @@ class MapViewModel {
   Stream<List<List<Tile>>> get tiles => _tilesController.stream;
   List<List<Tile>> _map;
   List<List<bool>> _visited;
+  int actualX, actualY;
 
   int get mapWidth => _map.length;
   int get mapHeight => _map?.first?.length;
@@ -58,22 +59,22 @@ class MapViewModel {
     } else {
       _visited[startX][startY] = true;
       if (_map[startX][startY].leftInput == Tile.road &&
-          _canGo(startX - 1, startY) &&
+          _canBeVisited(startX - 1, startY) &&
           _doesPathExist(startX - 1, startY, endX, endY)) {
         return true;
       }
       if (_map[startX][startY].rightInput == Tile.road &&
-          _canGo(startX + 1, startY) &&
+          _canBeVisited(startX + 1, startY) &&
           _doesPathExist(startX + 1, startY, endX, endY)) {
         return true;
       }
       if (_map[startX][startY].topInput == Tile.road &&
-          _canGo(startX, startY - 1) &&
+          _canBeVisited(startX, startY - 1) &&
           _doesPathExist(startX, startY - 1, endX, endY)) {
         return true;
       }
       if (_map[startX][startY].bottomInput == Tile.road &&
-          _canGo(startX, startY + 1) &&
+          _canBeVisited(startX, startY + 1) &&
           _doesPathExist(startX, startY + 1, endX, endY)) {
         return true;
       }
@@ -81,7 +82,29 @@ class MapViewModel {
     }
   }
 
-  bool _canGo(int x, int y) {
+  void setCarPosition(int x, int y) {
+    actualX = x;
+    actualY = y;
+  }
+
+  bool _canBeVisited(int x, int y) {
     return x >= 0 && x < mapWidth && y >= 0 && y < mapHeight && !_visited[x][y];
+  }
+
+  bool canGo(int x, int y) {
+    if (actualX == x && actualY + 1 == y) {
+      //moving down
+      return _map[actualX][actualY].bottomInput == Tile.road;
+    } else if (actualX == x && actualY - 1 == y) {
+      //moving up
+      return _map[actualX][actualY].topInput == Tile.road;
+    } else if (actualX + 1 == x && actualY == y) {
+      //moving right
+      return _map[actualX][actualY].rightInput == Tile.road;
+    } else if (actualX - 1 == x && actualY == y) {
+      //moving left
+      return _map[actualX][actualY].leftInput == Tile.road;
+    }
+    return false;
   }
 }
